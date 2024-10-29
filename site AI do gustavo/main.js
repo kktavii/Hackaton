@@ -1,82 +1,38 @@
-const apiKey = "sk-G1b17RduKEHolM3Iv0II199G9BwCNmbz20A33eWY_lT3BlbkFJFKjYN9O7MXFZUlOCu5AVjXavv-hFz0QY43z5h8CAoA";
 
-function sendMessage(){
-    var message = document.getElementById('message-input')
-    if(!message.value)
-    {
-        message.style.border = '1px solid red'
-        return;
-    }
-    message.style.border = 'none'
+const respostas = {
+    "finanças": "Finanças é a gestão eficiente de recursos financeiros para indivíduos, empresas e governos, visando maximizar valor e segurança econômica.",
+    "internet": "Para ganhar dinheiro online, explore áreas como criação de conteúdo (YouTube, blogs), vendas (e-commerce, dropshipping) e freelancing (design, escrita, programação). Plataformas como cursos, consultoria e investimentos digitais também são populares e rentáveis.",
+    "empresa": "Para dar os primeiros passos com sua empresa, comece com um plano de negócios claro, defina seu público-alvo e registre legalmente o negócio. Em seguida, desenvolva sua marca, crie uma presença online e busque financiamento, se necessário.",
+    "Muito obrigado": "De nada, estou aqui para te ajudar"
+};
 
-    var status = document.getElementById('status')
-    var btnSubmit = document.getElementById('btn-submit')
 
-    status.style.display = 'block'
-    status.innerHTML = 'Carregando...'
-    btnSubmit.disabled = true
-    btnSubmit.style.cursor = 'not-allowed'
-    message.disabled = true
+function sendMessage() {
+    const userInput = document.getElementById("user-input").value;
+    if (userInput.trim() === "") return;
 
-    fetch("https://api.openai.com/v1/completions",{
-        method: 'POST',
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-            model: "text-davinci-003",
-            prompt: message.value,
-            max_tokens: 2048, // tamanho da resposta
-            temperature: 0.5 // criatividade na resposta
-        })
-    })
-    .then((response) => response.json())
-    .then((response) => {
-        let r = response.choices[0]['text']
-        status.style.display = 'none'
-        showHistory(message.value,r)
-    })
-    .catch((e) => {
-        console.log(`Error -> ${e}`)
-        status.innerHTML = 'Erro, tente novamente mais tarde...'
-    })
-    .finally(() => {
-        btnSubmit.disabled = false
-        btnSubmit.style.cursor = 'pointer'
-        message.disabled = false
-        message.value = ''
-    })
+    addMessage("Você: " + userInput, "user-message");
+    document.getElementById("user-input").value = "";
+
+    
+    const botResponse = chatbot(userInput.toLowerCase());
+    addMessage("Chatbot: " + botResponse, "bot-message");
 }
 
-function showHistory(message,response){
-    var historyBox = document.getElementById('history')
+function chatbot(mensagem) {
+    for (const palavra in respostas) {
+        if (mensagem.includes(palavra)) {
+            return respostas[palavra];
+        }
+    }
+    return "Desculpe, não entendi. Poderia reformular?";
+}
 
-    // My message
-    var boxMyMessage = document.createElement('div')
-    boxMyMessage.className = 'box-my-message'
-
-    var myMessage = document.createElement('p')
-    myMessage.className = 'my-message'
-    myMessage.innerHTML = message
-
-    boxMyMessage.appendChild(myMessage)
-
-    historyBox.appendChild(boxMyMessage)
-
-    // Response message
-    var boxResponseMessage = document.createElement('div')
-    boxResponseMessage.className = 'box-response-message'
-
-    var chatResponse = document.createElement('p')
-    chatResponse.className = 'response-message'
-    chatResponse.innerHTML = response
-
-    boxResponseMessage.appendChild(chatResponse)
-
-    historyBox.appendChild(boxResponseMessage)
-
-    // Levar scroll para o final
-    historyBox.scrollTop = historyBox.scrollHeight
+function addMessage(text, className) {
+    const chatBox = document.getElementById("chat-box");
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "message " + className;
+    messageDiv.textContent = text;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight; 
 }
